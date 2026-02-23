@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guia de Biologia Molecular - Unimetro</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f8fb;
+    margin: 0;
+    color: #003366;
+}
+
+/* ===== LOADER ===== */
+#loader {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #001f3f;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 99999;
+    color: white;
+    text-align: center;
+}
+
+#fish {
+    width: 220px;
+    cursor: pointer;
+    animation: spin 2s linear infinite;
+    transition: transform 0.3s ease;
+    z-index: 2;
+}
+
+#fish:hover {
+    transform: scale(1.1);
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+}
+
+.hidden {
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.8s ease;
+}
+
+/* Pescaditos cayendo */
+#falling-fishes {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+    z-index: 1;
+}
+
+.fish-falling {
+    position: absolute;
+    width: 60px;
+    opacity: 0.7;
+    animation: fall linear forwards;
+    pointer-events: none;
+}
+
+@keyframes fall {
+    0% {
+        transform: translateY(-120px) rotate(0deg);
+    }
+    100% {
+        transform: translateY(120vh) rotate(720deg);
+    }
+}
+
+/* ===== CONTENIDO NORMAL ===== */
+header {
+    background: #003366;
+    color: white;
+    text-align: center;
+    padding: 30px;
+}
+
+nav {
+    background: #002244;
+    padding: 15px;
+    text-align: center;
+}
+
+nav a {
+    color: white;
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+nav a:hover {
+    color: #FF9900;
+}
+
+main {
+    max-width: 1100px;
+    margin: auto;
+    padding: 30px;
+}
+
+.module {
+    background: white;
+    padding: 25px;
+    margin: 25px 0;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    border-left: 6px solid #FF9900;
+}
+
+button {
+    background: #FF9900;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+button:hover {
+    background: #ff7700;
+}
+
+input, select {
+    padding: 10px;
+    margin: 10px 0;
+    width: 100%;
+    max-width: 400px;
+    border-radius: 6px;
+    border: 1px solid #0066CC;
+}
+
+.result {
+    margin-top: 15px;
+    padding: 15px;
+    background: #e6f2ff;
+    border-radius: 8px;
+}
+
+footer {
+    background: #003366;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    margin-top: 50px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- ===== PANTALLA DE CARGA ===== -->
+<div id="loader">
+    <div id="falling-fishes"></div>
+
+    <img src="https://pngimg.com/uploads/fish/fish_PNG1147.png" id="fish">
+    <h2 id="loader-text">Haz clic en el pescado para entrar 🐟</h2>
+
+    <audio id="bgMusic">
+        <source src="tako.mp3" type="audio/mpeg">
+        Tu navegador no soporta audio.
+    </audio>
+</div>
+
+<header>
+    <h1>Guia de Biologia Molecular - Unimetro</h1>
+    <p>Simulador Educativo de Diagnóstico Molecular</p>
+</header>
+
+<nav>
+    <a href="#muestra">Toma de Muestra</a>
+    <a href="#calidad">Control de Calidad</a>
+    <a href="#pcr">PCR</a>
+    <a href="#secuenciacion">Secuenciación</a>
+    <a href="#enzimas">Enzimas</a>
+</nav>
+
+<main>
+    <!-- TOMA DE MUESTRA -->
+    <div id="muestra" class="module">
+        <h2>Toma de Muestra</h2>
+        <select id="tipoMuestra">
+            <option>Sangre</option>
+            <option>Tejido vegetal</option>
+            <option>Hisopado bucal</option>
+            <option>Suelo</option>
+        </select>
+        <button onclick="evaluarMuestra()">Evaluar muestra</button>
+        <div id="muestraResult" class="result"></div>
+    </div>
+
+    <!-- CONTROL DE CALIDAD -->
+    <div id="calidad" class="module">
+        <h2>Control de Calidad (260/280)</h2>
+        <input type="number" id="a260" placeholder="Absorbancia A260">
+        <input type="number" id="a280" placeholder="Absorbancia A280">
+        <button onclick="calcularPureza()">Calcular</button>
+        <div id="result" class="result"></div>
+    </div>
+
+    <!-- PCR -->
+    <div id="pcr" class="module">
+        <h2>Simulación de PCR</h2>
+        <select id="primers">
+            <option>ITS - Hongos</option>
+            <option>COI - Insectos</option>
+            <option>16S - Bacterias</option>
+        </select>
+        <button onclick="simularPCR()">Iniciar Termociclador</button>
+        <div id="pcrResult" class="result"></div>
+    </div>
+
+    <!-- SECUENCIACIÓN -->
+    <div id="secuenciacion" class="module">
+        <h2>Secuenciación de ADN</h2>
+        <input type="text" id="secuencia" placeholder="Ingresa secuencia (Ej: ATGCGTAA)">
+        <button onclick="analizarSecuencia()">Analizar</button>
+        <div id="seqResult" class="result"></div>
+    </div>
+
+    <!-- ENZIMAS -->
+    <div id="enzimas" class="module">
+        <h2>Digestión con Enzimas de Restricción</h2>
+        <select id="enzima">
+            <option>EcoRI (GAATTC)</option>
+            <option>HindIII (AAGCTT)</option>
+            <option>BamHI (GGATCC)</option>
+        </select>
+        <button onclick="simularCorte()">Simular Corte</button>
+        <div id="enzimaResult" class="result"></div>
+    </div>
+</main>
+
+<footer>
+    Desarrollado por: Nicolle Julio Pinedo, Yerlis Carolina Martínez Collazos, Laura Daniela Amaya Rodríguez, María Inés Berrio Gamarra, José Andrés Muñoz Rivero<br>
+    Bajo supervisión del Profesor José Luis Villarreal Camacho<br>
+    Proyecto académico - Universidad Metropolitana de Barranquilla © 2026
+</footer>
+
+<!-- Icono flotante para abrir Grok como Profesor Pescado -->
+<div id="chat-icon" style="position:fixed; bottom:30px; right:30px; z-index:9999;">
+    <button id="openGrokBtn" style="width:70px; height:70px; border-radius:50%; background:#FF9900; color:white; border:none; font-size:34px; cursor:pointer; box-shadow:0 6px 20px rgba(0,0,0,0.4);">
+        💬
+    </button>
+</div>
+
+<script>
+// ──────────────── LÓGICA DEL LOADER + MÚSICA + PESCADOS CAYENDO ────────────────
+const loader = document.getElementById("loader");
+const mainFish = document.getElementById("fish");
+const audio = document.getElementById("bgMusic");
+const fallingContainer = document.getElementById("falling-fishes");
+const loaderText = document.getElementById("loader-text");
+
+const START_TIME = 63;       // 1:03 en segundos
+const PLAY_DURATION = 10;    // segundos que suena cada ciclo
+let hasPlayed = false;
+let clickCount = 0;
+const CLICKS_NEEDED = 5;
+
+
+// Crear un pescadito cayendo
+function createFallingFish() {
+    const fish = document.createElement("img");
+    fish.src = "https://pngimg.com/uploads/fish/fish_PNG1149.png";
+    fish.classList.add("fish-falling");
+    fish.style.left = Math.random() * 100 + "vw";
+    
+    const duration = 5 + Math.random() * 6;
+    fish.style.animationDuration = duration + "s";
+    
+    fish.style.animationDelay = Math.random() * 4 + "s";
+    
+    const size = 35 + Math.random() * 45;
+    fish.style.width = size + "px";
+
+    fallingContainer.appendChild(fish);
+    fish.addEventListener("animationend", () => fish.remove());
+}
+
+setInterval(createFallingFish, 700);
+
+
+// ─── Música al alcanzar los clics necesarios ───
+function startBackgroundMusic() {
+    if (hasPlayed) return;
+    hasPlayed = true;
+    audio.currentTime = START_TIME;
+    audio.play().catch(err => {
+        console.log("El navegador bloqueó el sonido (toca de nuevo si no suena)", err);
+    });
+    
+    setTimeout(() => {
+        if (audio.paused || loader.classList.contains("hidden")) return;
+        audio.pause();
+        setTimeout(() => {
+            if (!loader.classList.contains("hidden")) {
+                startBackgroundMusic();
+            }
+        }, 400);
+    }, PLAY_DURATION * 1000);
+}
+
+
+// Al hacer clic en el pescado grande
+mainFish.addEventListener("click", () => {
+    clickCount++;
+    
+    if (clickCount < CLICKS_NEEDED) {
+        const faltan = CLICKS_NEEDED - clickCount;
+        let mensaje = `¡Dale, ${faltan} clic${faltan === 1 ? '' : 's'} más! 🐟`;
+        if (faltan === 1) mensaje = "¡El último, dale duro! 🐠🔥";
+        loaderText.textContent = mensaje;
+        return;
+    }
+
+    // ── Al llegar a 5 clics ──
+    startBackgroundMusic();
+    loader.classList.add("hidden");
+    
+    setTimeout(() => {
+        loader.style.display = "none";
+        audio.pause();
+        audio.currentTime = 0;
+    }, 900);
+});
+
+
+// ──────────────── FUNCIONES DEL SIMULADOR ────────────────
+function evaluarMuestra(){
+    let tipo = document.getElementById("tipoMuestra").value;
+    document.getElementById("muestraResult").innerHTML =
+        "Muestra seleccionada: " + tipo + ".<br>Proceso recomendado: extracción con kit comercial y cuantificación posterior.";
+}
+
+function calcularPureza(){
+    let a260 = parseFloat(document.getElementById("a260").value);
+    let a280 = parseFloat(document.getElementById("a280").value);
+    if(!a260 || !a280){
+        document.getElementById("result").innerHTML = "Ingrese valores válidos.";
+        return;
+    }
+    let ratio = (a260 / a280).toFixed(2);
+    let mensaje = ratio >= 1.8 && ratio <= 2.0
+        ? "ADN puro y apto para PCR."
+        : ratio < 1.8
+        ? "Posible contaminación por proteínas."
+        : "Posible contaminación por ARN.";
+    document.getElementById("result").innerHTML = "Ratio: " + ratio + " → " + mensaje;
+}
+
+function simularPCR(){
+    let primers = document.getElementById("primers").value;
+    document.getElementById("pcrResult").innerHTML =
+        "Primers seleccionados: " + primers +
+        "<br>Amplificación exitosa.<br>Banda visible entre 500-800 bp.";
+}
+
+function analizarSecuencia(){
+    let seq = document.getElementById("secuencia").value.toUpperCase();
+    let longitud = seq.length;
+    let gc = ((seq.match(/[GC]/g) || []).length / longitud * 100).toFixed(2);
+    document.getElementById("seqResult").innerHTML =
+        "Longitud: " + longitud + " bp<br>Contenido GC: " + gc + "%";
+}
+
+function simularCorte(){
+    let enzima = document.getElementById("enzima").value;
+    document.getElementById("enzimaResult").innerHTML =
+        "Enzima seleccionada: " + enzima +
+        "<br>Simulación: Corte realizado en sitio específico.<br>Fragmentos generados correctamente.";
+}
+
+// Icono Grok Profesor Pescado
+document.getElementById('openGrokBtn').onclick = function() {
+    const grokUrl = "https://grok.x.ai/?prompt=Eres%20Profesor%20Pescado%2C%20profesor%20de%20Bioqu%C3%ADmica%20Molecular%20de%20la%20Universidad%20Metropolitana%20de%20Barranquilla.%20S%C3%A9%20MUY%20paciente%2C%20encantador%20y%20explicativo.%20Usa%20espa%C3%B1ol%20caribe%C3%B1o%20suave%3A%20%22mijo%22%2C%20%22ch%C3%A9vere%22%2C%20%22tranquilo%22%2C%20%22vamos%20a%20ver%20eso%22.%20Siempre%20intercalas%20o%20terminas%20con%20chistes%20MUY%20malos%20que%20solo%20t%C3%BA%20entiendes%20(estilo%20pap%C3%A1%20qu%C3%ADmico).%20Responde%20con%20tono%20motivador%2C%20educativo%20y%20humor%20ligero.%20Si%20el%20estudiante%20dice%20%22no%20entend%C3%AD%22%20o%20%22simplifica%22%2C%20explica%20m%C3%A1s%20f%C3%A1cil%20y%20pregunta%20al%20final.%20Tienes%20amplio%20conocimiento%20en%3A%20ADN%2C%20ARN%2C%20prote%C3%ADnas%2C%20PCR%2C%20secuenciacion%2C%20enzimas%20de%20restricci%C3%B3n%2C%20replicaci%C3%B3n%2C%20transcripci%C3%B3n%2C%20traducci%C3%B3n%2C%20metabolismo%20(glic%C3%B3lisis%2C%20Krebs)%2C%20CRISPR%2C%20electrof%C3%B3resis%2C%20espectrofotometr%C3%ADa%2C%20clonaci%C3%B3n%2C%20transg%C3%A9nicos%2C%20mutaciones%2C%20gen%C3%A9tica%20mendeliana%2C%20epigen%C3%A9tica%2C%20bioinform%C3%A1tica%20y%20todo%20lo%20relacionado%20con%20biolaboratorio%20molecular.%20Responde%20siempre%20en%20espa%C3%B1ol.";
+    window.open(grokUrl, 'grokChat', 'width=400,height=600,left=200,top=100,scrollbars=yes,resizable=yes');
+};
+</script>
+
+</body>
+</html>
